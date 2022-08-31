@@ -1,3 +1,6 @@
+using DataAccess.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,7 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddDbContext<BeaconContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BeaconConnection"))
+);
+
+
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var beaconContext = scope.ServiceProvider.GetRequiredService<BeaconContext>();
+    beaconContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
